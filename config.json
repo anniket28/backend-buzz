@@ -1,0 +1,4 @@
+{
+    "mongoURI":"mongodb+srv://root:6f8b7fbea16c@cluster0.t3ufh.mongodb.net/buzz",
+    "JWT_SECRET":"eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTY1MTU1MzM3MSwiaWF0IjoxNjUxNTUzMzcxfQ.MmnjnTC110Bvs5CAq7EUy_VXV2uf4TQcGJftHT3RkYY"
+}
