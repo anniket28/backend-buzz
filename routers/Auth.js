@@ -77,7 +77,7 @@ router.post('/signup',upload.array('images',5),async(req,res)=>{
         for (let index = 0; index < req.files.length; index++) {
             imageArray.push(req.files[index].path)
         }
-        // console.log(imageArray) 
+        console.log(imageArray) 
         user.image=imageArray
         user.save()
         // Fetching User

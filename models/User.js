@@ -43,6 +43,42 @@ const UserSchema=new mongoose.Schema({
         type: String,
         default: ""
     },
+    buzzedBy:{
+        type: Array
+    },
+    buzzedByTime:{
+        type: Array
+    },
+    buzzedTo:{
+        type: Array
+    },
+    buzzedToTime:{
+        type: Array
+    },
+    isDiscoverable:{
+        type: Boolean
+    },
+    isAlreadyLoggedIn:{
+        type: Boolean
+    },
+    buzzLine:{
+        type: String
+    },
+    isPremium:{
+        type: Boolean
+    },
+    likdBy:{
+        type: Array
+    },
+    likdByTime:{
+        type: Array
+    },
+    likedTo:{
+        type: Array
+    },
+    likedToTime:{
+        type: Array
+    },
     date_user_created:{
         type: Date,
         default:Date.now
