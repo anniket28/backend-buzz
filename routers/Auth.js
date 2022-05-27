@@ -77,7 +77,7 @@ router.post('/signup',upload.array('images',5),async(req,res)=>{
         for (let index = 0; index < req.files.length; index++) {
             imageArray.push(req.files[index].path)
         }
-        console.log(imageArray) 
+        // console.log(imageArray) 
         user.image=imageArray
         user.save()
         // Fetching User
@@ -102,6 +102,77 @@ router.get('/fetchuser',fetchuser,async(req,res)=>{
         const userid=req.user.id
         const user=await User.findById(userid)
         res.json({user:user})
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
+function distance(lat1,lat2, lon1, lon2){
+    lon1 =  lon1 * Math.PI / 180;
+    lon2 = lon2 * Math.PI / 180;
+    lat1 = lat1 * Math.PI / 180;
+    lat2 = lat2 * Math.PI / 180;
+
+    // Haversine formula
+    let dlon = lon2 - lon1;
+    let dlat = lat2 - lat1;
+    let a = Math.pow(Math.sin(dlat / 2), 2)
+             + Math.cos(lat1) * Math.cos(lat2)
+             * Math.pow(Math.sin(dlon / 2),2);
+           
+    let c = 2 * Math.asin(Math.sqrt(a));
+
+    // Radius of earth in kilometers. Use 3956
+    // for miles
+    let r = 6371;
+
+    // calculate the result
+    return(c * r * 1000);
+}
+
+// Get Nearby Users
+router.get('/getNearbyUsers',fetchuser,async(req,res)=>{
+    try{
+        const userid=req.user.id
+
+        // The User Coordinates
+        const theUser=await User.findById(userid)
+        var theUserCoordinates = theUser.currentLocation;
+        theUserCoordinates = theUserCoordinates.replace(/[\(\)]/g,'').split(',');
+        let lat1 = theUserCoordinates[0];
+        let lon1 = theUserCoordinates[1];
+        // console.log(theUserCoordinates[0]);
+        // console.log(theUserCoordinates[1]);
+
+        // Find Nearby Users
+        let nearbyUsers=[]
+        const discoverableUsers=await User.find({isDiscoverable: true})
+        discoverableUsers.map((discoverable)=>{
+            if(discoverable._id!=userid){
+                // console.log(discoverable._id)
+                // console.log(theUser.currentLocation)
+                
+                var otherUserCoordinates = discoverable.currentLocation;
+                otherUserCoordinates = otherUserCoordinates.replace(/[\(\)]/g,'').split(',');
+                // console.log(otherUserCoordinates[0]);
+                // console.log(otherUserCoordinates[1]);
+
+                let lat2 = otherUserCoordinates[0];
+                let lon2 = otherUserCoordinates[1];
+
+                let distanceBetweenUsers=distance(lat1, lat2, lon1, lon2)
+                // console.log(distance(lat1, lat2, lon1, lon2) + " metres");
+                // console.log(distanceBetweenUsers)
+
+                if(distanceBetweenUsers<=300){
+                    nearbyUsers.push(discoverable._id)
+                }
+            }
+        })
+
+        res.json({nearbyUsers:nearbyUsers})
     }
     catch (error) {
         console.log("Internal Server Error "+error)
