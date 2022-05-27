@@ -167,7 +167,7 @@ router.get('/getNearbyUsers',fetchuser,async(req,res)=>{
                 // console.log(distanceBetweenUsers)
 
                 if(distanceBetweenUsers<=300){
-                    nearbyUsers.push(discoverable._id)
+                    nearbyUsers.push(discoverable)
                 }
             }
         })
