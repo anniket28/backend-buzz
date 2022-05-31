@@ -37,6 +37,7 @@ router.post('/check-user',async(req,res)=>{
     try{
         // Check If User Exists
         let user=await User.findOne({phone_number:req.body.phoneNumber})
+        console.log(user)
         // If Exists
         if(user){
             const data={
@@ -60,6 +61,7 @@ router.post('/isBuzzNameUnique',async(req,res)=>{
     try{
         // Check If User Buzz Name is unique
         let buzzNameCheck=await User.findOne({buzz_name:req.body.buzzName})
+        console.log(req.body.buzzName)
         // If Exists
         if(buzzNameCheck){
             return res.json({buzzNameUnique:false})
@@ -118,7 +120,33 @@ router.get('/fetchuser',fetchuser,async(req,res)=>{
     try{
         const userid=req.user.id
         const user=await User.findById(userid)
-        res.json({user:user})
+
+        // Liked To
+        let likedTo=[]
+        for (let index = 0; index < user.likedTo.length; index++) {
+            const userLikedTo=await User.findById(user.likedTo[index])
+            likedTo.push(userLikedTo)
+        }
+        // Liked By
+        let likedBy=[]
+        for (let index = 0; index < user.likedBy.length; index++) {
+            const userLikedBy=await User.findById(user.likedBy[index])
+            likedBy.push(userLikedBy)
+        }
+        // Leftswiped By
+        let leftswipedBy=[]
+        for (let index = 0; index < user.leftSwipedBy.length; index++) {
+            const userleftswipedBy=await User.findById(user.leftSwipedBy[index])
+            leftswipedBy.push(userleftswipedBy)
+        }
+        // Leftswiped To
+        let leftswipedTo=[]
+        for (let index = 0; index < user.leftSwipedTo.length; index++) {
+            const userleftswipedTo=await User.findById(user.leftSwipedTo[index])
+            leftswipedTo.push(userleftswipedTo)
+        }
+        
+        res.json({user:user,likedTo:likedTo,likedBy:likedBy,leftswipedBy:leftswipedBy,leftswipedTo:leftswipedTo})
     }
     catch (error) {
         console.log("Internal Server Error "+error)
@@ -195,18 +223,6 @@ router.get('/getNearbyUsers',fetchuser,async(req,res)=>{
         console.log("Internal Server Error "+error)
         res.send("Internal Server Error")
     }
-})
-
-router.post('/upload',(req,res)=>{
-    // upload(req,res,function(err) {
-    //     //console.log(req.body);
-    //     console.log(req.files);
-    //     if(err) {
-    //         console.log(err)
-    //         return res.end("Error uploading file.");
-    //     }
-    //     res.end("File is uploaded");
-    // });
 })
 
 module.exports=router

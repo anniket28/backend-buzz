@@ -14,6 +14,7 @@ app.use(express.json())
 app.use(cors())
 app.use(urlencoded({extended: false}))
 
+
 // User Authentication
 app.use('/api/auth',require('./routers/Auth'))
 app.use('/api/update',require('./routers/Update'))

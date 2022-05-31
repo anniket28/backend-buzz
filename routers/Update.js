@@ -33,22 +33,24 @@ function distance(lat1,lat2, lon1, lon2){
 router.post('/editUserData',fetchuser,async(req,res)=>{
     try{
         const userid=req.user.id
-        const user=await User.findByIdAndUpdate(userid,{
-            phone_number:req.body.phoneNumber,
-            full_name:req.body.fullName,
-            buzz_name:req.body.buzzName,
-            date_of_birth:req.body.dateOfBirth,
-            gender:req.body.gender,
-            interests:req.body.interests,
-            bio:req.body.bio,
-            country:req.body.country,
-            city:req.body.city,
-            profession:req.body.profession,
-            email:req.body.email,
-            currentLocation:req.body.currentLocation,
-            buzzLine:req.body.buzzLine
-        })
-        res.json({user:user})
+
+        const {phoneNumber,fullName,buzzName,dateOfBirth,gender,interests,bio,country,city,profession,email}=req.body
+        const newData={}
+
+        if(phoneNumber){newData.phone_number=phoneNumber}
+        if(fullName){newData.full_name=fullName}
+        if(buzzName){newData.buzz_name=buzzName}
+        if(dateOfBirth){newData.date_of_birth=dateOfBirth}
+        if(gender){newData.gender=gender}
+        if(interests){newData.interests=interests}
+        if(bio){newData.bio=bio}
+        if(country){newData.country=country}
+        if(city){newData.city=city}
+        if(profession){newData.profession=profession}
+        if(email){newData.email=email}
+
+        const editUserData=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
+        res.json({updatedSuccessfully:true,editUserData:editUserData})
     }
     catch (error) {
         console.log("Internal Server Error "+error)
