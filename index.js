@@ -17,6 +17,7 @@ app.use(urlencoded({extended: false}))
 // User Authentication
 app.use('/api/auth',require('./routers/Auth'))
 app.use('/api/update',require('./routers/Update'))
+app.use('/api/interest',require('./routers/Interest'))
 
 // App Run
 app.listen(port,()=>{

@@ -55,6 +55,23 @@ router.post('/check-user',async(req,res)=>{
     }
 })
 
+// Check if Buzz Name is Unique
+router.post('/isBuzzNameUnique',async(req,res)=>{
+    try{
+        // Check If User Buzz Name is unique
+        let buzzNameCheck=await User.findOne({buzz_name:req.body.buzzName})
+        // If Exists
+        if(buzzNameCheck){
+            return res.json({buzzNameUnique:false})
+        }
+        res.json({buzzNameUnique:true})
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
 // User Signup
 router.post('/signup',upload.array('images',5),async(req,res)=>{
     try {

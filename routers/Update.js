@@ -29,6 +29,33 @@ function distance(lat1,lat2, lon1, lon2){
     return(c * r * 1000);
 }
 
+// Edit User Data
+router.post('/editUserData',fetchuser,async(req,res)=>{
+    try{
+        const userid=req.user.id
+        const user=await User.findByIdAndUpdate(userid,{
+            phone_number:req.body.phoneNumber,
+            full_name:req.body.fullName,
+            buzz_name:req.body.buzzName,
+            date_of_birth:req.body.dateOfBirth,
+            gender:req.body.gender,
+            interests:req.body.interests,
+            bio:req.body.bio,
+            country:req.body.country,
+            city:req.body.city,
+            profession:req.body.profession,
+            email:req.body.email,
+            currentLocation:req.body.currentLocation,
+            buzzLine:req.body.buzzLine
+        })
+        res.json({user:user})
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
 // Set Discoverable True
 router.post('/setDiscoverableT',fetchuser,async(req,res)=>{
     try{
@@ -98,6 +125,52 @@ router.post('/setCurrentLocation',fetchuser,async(req,res)=>{
         const userid=req.user.id
         const setCurrentLocation=await User.findByIdAndUpdate(userid,{currentLocation:userCurrentLocation})
         res.json({cuurentLocationSet:true,})
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
+// Liked By
+router.post('/like/:id',fetchuser,async(req,res)=>{
+    try{
+        const userid=req.user.id
+
+        const userLiking=await User.findById(userid)
+        const userToLike=await User.findById(req.params.id)
+        if(userToLike.likedBy.includes(userid)){
+            res.json({likedPreviously: true})
+        }
+        else{
+            const updateLikedBy=await User.findByIdAndUpdate(req.params.id,{$push:{likedBy:userid}})
+            const updateLikedTo=await User.findByIdAndUpdate(userid,{$push:{likedTo:req.params.id}})
+            res.json({likedSuccessfully:true,likedToSaved:true,updateLikedBy})
+        }
+
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
+// Left Swiped
+router.post('/leftSwipe/:id',fetchuser,async(req,res)=>{
+    try{
+        const userid=req.user.id
+
+        const userLeftSwiping=await User.findById(userid)
+        const userToLeftSwiped=await User.findById(req.params.id)
+        if(userLeftSwiping.leftSwipedTo.includes(req.params.id)){
+            res.json({leftSwipedPreviously: true})
+        }
+        else{
+            const updatLeftSwipedBy=await User.findByIdAndUpdate(req.params.id,{$push:{leftSwipedBy:userid}})
+            const updateLeftSwipedTo=await User.findByIdAndUpdate(userid,{$push:{leftSwipedTo:req.params.id}})
+            res.json({leftSwipedSuccessfully:true,leftSwipedSaved:true,updateLeftSwipedTo})
+        }
+
     }
     catch (error) {
         console.log("Internal Server Error "+error)

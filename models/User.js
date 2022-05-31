@@ -90,6 +90,14 @@ const UserSchema=new mongoose.Schema({
         type: Array,
         default: []
     },
+    leftSwipedTo:{
+        type: Array,
+        default: []
+    },
+    leftSwipedBy:{
+        type: Array,
+        default: []
+    },
     currentLocation:{
         type: String,
         default: ""
