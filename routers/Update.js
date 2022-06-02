@@ -1,11 +1,14 @@
+// Require
 const express=require('express')
 const User=require('../models/User')
 var jwt=require('jsonwebtoken')
 const fetchuser=require('../middleware/fetchuser')
 const config=require('../config.json')
 
+// Router
 const router=express.Router()
 
+// // Function To Find Distance Between Two Users
 function distance(lat1,lat2, lon1, lon2){
     lon1 =  lon1 * Math.PI / 180;
     lon2 = lon2 * Math.PI / 180;
@@ -21,8 +24,7 @@ function distance(lat1,lat2, lon1, lon2){
            
     let c = 2 * Math.asin(Math.sqrt(a));
 
-    // Radius of earth in kilometers. Use 3956
-    // for miles
+    // Radius of earth in kilometers. Use 3956 for miles
     let r = 6371;
 
     // calculate the result
@@ -32,11 +34,16 @@ function distance(lat1,lat2, lon1, lon2){
 // Edit User Data
 router.post('/editUserData',fetchuser,async(req,res)=>{
     try{
+        // Getting User Id
         const userid=req.user.id
 
+        // Getting all values
         const {phoneNumber,fullName,buzzName,dateOfBirth,gender,interests,bio,country,city,profession,email}=req.body
+
+        // Creating new data
         const newData={}
 
+        // If value to be changed replace with new value
         if(phoneNumber){newData.phone_number=phoneNumber}
         if(fullName){newData.full_name=fullName}
         if(buzzName){newData.buzz_name=buzzName}
@@ -50,6 +57,7 @@ router.post('/editUserData',fetchuser,async(req,res)=>{
         if(email){newData.email=email}
 
         const editUserData=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
+
         res.json({updatedSuccessfully:true,editUserData:editUserData})
     }
     catch (error) {
@@ -61,8 +69,14 @@ router.post('/editUserData',fetchuser,async(req,res)=>{
 // Set Discoverable True
 router.post('/setDiscoverableT',fetchuser,async(req,res)=>{
     try{
+        //  Getting User Id
         const userid=req.user.id
-        const updateDiscoverable=await User.findByIdAndUpdate(userid,{isDiscoverable:true})
+
+        // Setting isDiscoverable to true
+        const newData={}
+        newData.isDiscoverable=true
+
+        const updateDiscoverable=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
 
         // The User Coordinates
         const theUser=await User.findById(userid)
@@ -99,7 +113,7 @@ router.post('/setDiscoverableT',fetchuser,async(req,res)=>{
             }
         })
 
-        res.json({discoverableUpdated:true,updateDiscoverable,nearbyUsers:nearbyUsers})
+        res.json({discoverableUpdatedToTrue:true,updateDiscoverable:updateDiscoverable,nearbyUsers:nearbyUsers})
     }
     catch (error) {
         console.log("Internal Server Error "+error)
@@ -110,9 +124,16 @@ router.post('/setDiscoverableT',fetchuser,async(req,res)=>{
 // Set Discoverable False
 router.post('/setDiscoverableF',fetchuser,async(req,res)=>{
     try{
+        // Getting User Id
         const userid=req.user.id
-        const updateDiscoverable=await User.findByIdAndUpdate(userid,{isDiscoverable:false})
-        res.json({discoverableUpdated:true,updateDiscoverable})
+
+        // Setting isDiscoverable to false
+        const newData={}
+        newData.isDiscoverable=false
+
+        const updateDiscoverable=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
+
+        res.json({discoverableUpdatedToFalse:true,updateDiscoverable:updateDiscoverable})
     }
     catch (error) {
         console.log("Internal Server Error "+error)
@@ -123,10 +144,16 @@ router.post('/setDiscoverableF',fetchuser,async(req,res)=>{
 // Set Current Location
 router.post('/setCurrentLocation',fetchuser,async(req,res)=>{
     try{
-        let userCurrentLocation=req.body.currentLocation
+        // Getting User Id
         const userid=req.user.id
-        const setCurrentLocation=await User.findByIdAndUpdate(userid,{currentLocation:userCurrentLocation})
-        res.json({cuurentLocationSet:true,})
+
+        // Setting currentLocation
+        const newData={}
+        newData.currentLocation=req.body.currentLocation
+
+        const setCurrentLocation=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
+
+        res.json({currentLocationSet:true,setCurrentLocation:setCurrentLocation})
     }
     catch (error) {
         console.log("Internal Server Error "+error)
@@ -137,8 +164,10 @@ router.post('/setCurrentLocation',fetchuser,async(req,res)=>{
 // Liked By
 router.post('/like/:id',fetchuser,async(req,res)=>{
     try{
+        // Getting User Id
         const userid=req.user.id
 
+        // 
         const userLiking=await User.findById(userid)
         const userToLike=await User.findById(req.params.id)
         if(userToLike.likedBy.includes(userid)){
@@ -160,8 +189,10 @@ router.post('/like/:id',fetchuser,async(req,res)=>{
 // Left Swiped
 router.post('/leftSwipe/:id',fetchuser,async(req,res)=>{
     try{
+        // Getting User Id
         const userid=req.user.id
 
+        // 
         const userLeftSwiping=await User.findById(userid)
         const userToLeftSwiped=await User.findById(req.params.id)
         if(userLeftSwiping.leftSwipedTo.includes(req.params.id)){

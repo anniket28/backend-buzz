@@ -1,3 +1,4 @@
+// Require
 const express=require('express')
 const User=require('../models/User')
 var jwt=require('jsonwebtoken')
@@ -5,8 +6,10 @@ const multer=require('multer')
 const fetchuser=require('../middleware/fetchuser')
 const config=require('../config.json')
 
+// Router
 const router=express.Router()
 
+// Multer Storage
 const storage=multer.diskStorage({
     destination:function(req,file,cb){
         cb(null,'./static/')
@@ -16,6 +19,7 @@ const storage=multer.diskStorage({
     }
 })
 
+// File Filter For Multer Images
 const fileFilter=(req,file,cb)=>{
     if(file.mimetype==='image/jpeg' || file.mimetype==='image/jpg' || file.mimetype==='image/png'){
         cb(null,true)
@@ -25,6 +29,7 @@ const fileFilter=(req,file,cb)=>{
     }
 }
 
+// Upload For Multer Images
 const upload=multer({storage:storage,
     limits:{
         fileSize:1024*1024*5,
@@ -37,7 +42,6 @@ router.post('/check-user',async(req,res)=>{
     try{
         // Check If User Exists
         let user=await User.findOne({phone_number:req.body.phoneNumber})
-        console.log(user)
         // If Exists
         if(user){
             const data={
@@ -45,9 +49,36 @@ router.post('/check-user',async(req,res)=>{
                     id:user._id
                 }
             }
+
+            // Liked To
+            let likedTo=[]
+            for (let index = 0; index < user.likedTo.length; index++) {
+                const userLikedTo=await User.findById(user.likedTo[index])
+                likedTo.push(userLikedTo)
+            }
+            // Liked By
+            let likedBy=[]
+            for (let index = 0; index < user.likedBy.length; index++) {
+                const userLikedBy=await User.findById(user.likedBy[index])
+                likedBy.push(userLikedBy)
+            }
+            // Leftswiped By
+            let leftswipedBy=[]
+            for (let index = 0; index < user.leftSwipedBy.length; index++) {
+                const userleftswipedBy=await User.findById(user.leftSwipedBy[index])
+                leftswipedBy.push(userleftswipedBy)
+            }
+            // Leftswiped To
+            let leftswipedTo=[]
+            for (let index = 0; index < user.leftSwipedTo.length; index++) {
+                const userleftswipedTo=await User.findById(user.leftSwipedTo[index])
+                leftswipedTo.push(userleftswipedTo)
+            }
+
             const authtoken=jwt.sign(data,config.JWT_SECRET)
-            return res.json({exists:true,user:user,authtoken:authtoken})
+            return res.json({exists:true,user:user,authtoken:authtoken,likedTo:likedTo,likedBy:likedBy,leftswipedBy:leftswipedBy,leftswipedTo:leftswipedTo})
         }
+
         res.json({exists:false})
     }
     catch (error) {
@@ -60,12 +91,12 @@ router.post('/check-user',async(req,res)=>{
 router.post('/isBuzzNameUnique',async(req,res)=>{
     try{
         // Check If User Buzz Name is unique
-        let buzzNameCheck=await User.findOne({buzz_name:req.body.buzzName})
-        console.log(req.body.buzzName)
+        let buzzNameUniqueCheck=await User.findOne({buzz_name:req.body.buzzName})
         // If Exists
-        if(buzzNameCheck){
+        if(buzzNameUniqueCheck){
             return res.json({buzzNameUnique:false})
         }
+
         res.json({buzzNameUnique:true})
     }
     catch (error) {
@@ -91,6 +122,7 @@ router.post('/signup',upload.array('images',5),async(req,res)=>{
             profession:req.body.profession,
             email:req.body.email
         })
+
         // console.log(req.files)
         let imageArray=[]
         for (let index = 0; index < req.files.length; index++) {
@@ -99,15 +131,42 @@ router.post('/signup',upload.array('images',5),async(req,res)=>{
         // console.log(imageArray) 
         user.image=imageArray
         user.save()
-        // Fetching User
-        user=await User.findOne({phone_number:req.body.phoneNumber})
+
+        const userid=user._id
+
         const data={
             user:{
-                id:user._id
+                id:userid
             }
         }
+
+        // Liked To
+        let likedTo=[]
+        for (let index = 0; index < user.likedTo.length; index++) {
+            const userLikedTo=await User.findById(user.likedTo[index])
+            likedTo.push(userLikedTo)
+        }
+        // Liked By
+        let likedBy=[]
+        for (let index = 0; index < user.likedBy.length; index++) {
+            const userLikedBy=await User.findById(user.likedBy[index])
+            likedBy.push(userLikedBy)
+        }
+        // Leftswiped By
+        let leftswipedBy=[]
+        for (let index = 0; index < user.leftSwipedBy.length; index++) {
+            const userleftswipedBy=await User.findById(user.leftSwipedBy[index])
+            leftswipedBy.push(userleftswipedBy)
+        }
+        // Leftswiped To
+        let leftswipedTo=[]
+        for (let index = 0; index < user.leftSwipedTo.length; index++) {
+            const userleftswipedTo=await User.findById(user.leftSwipedTo[index])
+            leftswipedTo.push(userleftswipedTo)
+        }
+
         const authtoken=jwt.sign(data,config.JWT_SECRET)
-        res.json({success:true,user:user,authtoken:authtoken,"Success":"User Signup Successful"})
+        res.json({"Success":"User Signup Successful",success:true,user:user,authtoken:authtoken,likedTo:likedTo,likedBy:likedBy,leftswipedBy:leftswipedBy,leftswipedTo:leftswipedTo})
     } 
     catch (error) {
         console.log("Internal Server Error "+error)
@@ -118,7 +177,10 @@ router.post('/signup',upload.array('images',5),async(req,res)=>{
 // Get User
 router.get('/fetchuser',fetchuser,async(req,res)=>{
     try{
+        // Getting User Id
         const userid=req.user.id
+
+        // Get User
         const user=await User.findById(userid)
 
         // Liked To
@@ -154,6 +216,7 @@ router.get('/fetchuser',fetchuser,async(req,res)=>{
     }
 })
 
+// Function To Find Distance Between Two Users
 function distance(lat1,lat2, lon1, lon2){
     lon1 =  lon1 * Math.PI / 180;
     lon2 = lon2 * Math.PI / 180;
@@ -169,8 +232,7 @@ function distance(lat1,lat2, lon1, lon2){
            
     let c = 2 * Math.asin(Math.sqrt(a));
 
-    // Radius of earth in kilometers. Use 3956
-    // for miles
+    // Radius of earth in kilometers. Use 3956 for miles
     let r = 6371;
 
     // calculate the result
@@ -180,6 +242,7 @@ function distance(lat1,lat2, lon1, lon2){
 // Get Nearby Users
 router.get('/getNearbyUsers',fetchuser,async(req,res)=>{
     try{
+        // Getiing User Id
         const userid=req.user.id
 
         // The User Coordinates
