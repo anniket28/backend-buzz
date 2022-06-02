@@ -20,8 +20,8 @@ const UserSchema=new mongoose.Schema({
         type: Array
     },
     interests:{
-        type: String,
-        default: ""
+        type: Array,
+        default: []
     },
     bio:{
         type: String,
