@@ -4,6 +4,7 @@ const User=require('../models/User')
 var jwt=require('jsonwebtoken')
 const multer=require('multer')
 const fetchuser=require('../middleware/fetchuser')
+const { v4: uuidv4 } = require('uuid');
 const config=require('../config.json')
 
 // Router
@@ -15,7 +16,7 @@ const storage=multer.diskStorage({
         cb(null,'./static/')
     },
     filename:function(req,file,cb){
-        cb(null,new Date().toISOString()+file.originalname)
+        cb(null,uuidv4()+"_"+Date.now()+"_"+file.originalname)
     }
 })
 
@@ -242,7 +243,7 @@ function distance(lat1,lat2, lon1, lon2){
 // Get Nearby Users
 router.get('/getNearbyUsers',fetchuser,async(req,res)=>{
     try{
-        // Getiing User Id
+        // Getting User Id
         const userid=req.user.id
 
         // The User Coordinates
@@ -281,6 +282,46 @@ router.get('/getNearbyUsers',fetchuser,async(req,res)=>{
         })
 
         res.json({nearbyUsers:nearbyUsers})
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
+// Get Buzzed With
+router.get('/buzzedWith',fetchuser,async(req,res)=>{
+    try{
+        // Getting User Id
+        const userid=req.user.id
+
+        // Getting User
+        const myUser=await User.findById(userid)
+
+        // Liked To Users and Liked By Users
+        const likedToUsers=myUser.likedTo
+        const likedByUsers=myUser.likedBy
+
+        // Buzzed With
+        let buzzedWith=[]
+        for (let i = 0; i < likedToUsers.length; i++) {
+            for (let j = i; j < likedByUsers.length; j++) {
+                if(likedToUsers[i]==likedByUsers[j]){
+                    buzzedWith.push(likedToUsers[i])
+                }
+            }
+        }
+
+        // Buzzed With Users
+        let buzzedWithUsers=[]
+        for (let index = 0; index < buzzedWith.length; index++) {
+            console.log(buzzedWith[index])
+            let theUser=await User.findById(buzzedWith[index])
+            console.log(theUser)
+            buzzedWithUsers.push(theUser)
+        }
+
+        res.json({buzzedWithUsers:buzzedWithUsers})
     }
     catch (error) {
         console.log("Internal Server Error "+error)

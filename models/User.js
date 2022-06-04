@@ -43,22 +43,6 @@ const UserSchema=new mongoose.Schema({
         type: String,
         default: ""
     },
-    buzzedBy:{
-        type: Array,
-        default: []
-    },
-    buzzedByTime:{
-        type: Array,
-        default: []
-    },
-    buzzedTo:{
-        type: Array,
-        default: []
-    },
-    buzzedToTime:{
-        type: Array,
-        default: []
-    },
     isDiscoverable:{
         type: Boolean,
         default: false
@@ -78,15 +62,7 @@ const UserSchema=new mongoose.Schema({
         type: Array,
         default: []
     },
-    likdByTime:{
-        type: Array,
-        default: []
-    },
     likedTo:{
-        type: Array,
-        default: []
-    },
-    likedToTime:{
         type: Array,
         default: []
     },
@@ -95,6 +71,10 @@ const UserSchema=new mongoose.Schema({
         default: []
     },
     leftSwipedBy:{
+        type: Array,
+        default: []
+    },
+    buzzedWith:{
         type: Array,
         default: []
     },

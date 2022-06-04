@@ -1,12 +1,41 @@
 // Require
 const express=require('express')
 const User=require('../models/User')
-var jwt=require('jsonwebtoken')
 const fetchuser=require('../middleware/fetchuser')
-const config=require('../config.json')
+const multer=require('multer')
+const { v4: uuidv4 } = require('uuid');
+const fs=require('fs')
 
 // Router
 const router=express.Router()
+
+// Multer Storage
+const storage=multer.diskStorage({
+    destination:function(req,file,cb){
+        cb(null,'./static/')
+    },
+    filename:function(req,file,cb){
+        cb(null,uuidv4()+"_"+Date.now()+"_"+file.originalname)
+    }
+})
+
+// File Filter For Multer Images
+const fileFilter=(req,file,cb)=>{
+    if(file.mimetype==='image/jpeg' || file.mimetype==='image/jpg' || file.mimetype==='image/png'){
+        cb(null,true)
+    }
+    else{
+        cb(null,false)
+    }
+}
+
+// Upload For Multer Images
+const upload=multer({storage:storage,
+    limits:{
+        fileSize:1024*1024*5,
+    },
+    fileFilter:fileFilter
+})
 
 // // Function To Find Distance Between Two Users
 function distance(lat1,lat2, lon1, lon2){
@@ -32,16 +61,20 @@ function distance(lat1,lat2, lon1, lon2){
 }
 
 // Edit User Data
-router.post('/editUserData',fetchuser,async(req,res)=>{
+router.post('/editUserData',fetchuser,upload.array('images',5),async(req,res)=>{
     try{
         // Getting User Id
         const userid=req.user.id
+
+        // Get User Details
+        const myUser=await User.findById(userid)
 
         // Getting all values
         const {phoneNumber,fullName,buzzName,dateOfBirth,gender,interests,bio,country,city,profession,email}=req.body
 
         // Creating new data
         const newData={}
+        let imageArray=[]
 
         // If value to be changed replace with new value
         if(phoneNumber){newData.phone_number=phoneNumber}
@@ -55,6 +88,27 @@ router.post('/editUserData',fetchuser,async(req,res)=>{
         if(city){newData.city=city}
         if(profession){newData.profession=profession}
         if(email){newData.email=email}
+
+        // console.log(req.files.length)
+        if(req.files.length>0){
+            // Storing new images
+            for (let index = 0; index < req.files.length; index++) {
+                imageArray.push(req.files[index].path)
+            }
+            newData.image=imageArray
+            // console.log(imageArray)
+
+            // Deleting old images
+            for (let index = 0; index < myUser.image.length; index++) {
+                const imagePath=myUser.image[index]
+                try {
+                    // console.log(imagePath)
+                    fs.unlinkSync(imagePath)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+        } 
 
         const editUserData=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
 
