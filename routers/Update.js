@@ -224,13 +224,13 @@ router.post('/like/:id',fetchuser,async(req,res)=>{
         // 
         const userLiking=await User.findById(userid)
         const userToLike=await User.findById(req.params.id)
-        if(userToLike.likedBy.includes(userid)){
+        if(userLiking.likedTo.includes(userid)){
             res.json({likedPreviously: true})
         }
         else{
-            const updateLikedBy=await User.findByIdAndUpdate(req.params.id,{$push:{likedBy:userid}})
-            const updateLikedTo=await User.findByIdAndUpdate(userid,{$push:{likedTo:req.params.id}})
-            res.json({likedSuccessfully:true,likedToSaved:true,updateLikedBy})
+            const updateLikedBy=await User.findByIdAndUpdate(req.params.id,{$push:{likedBy:userid}},{new:true})
+            const updateLikedTo=await User.findByIdAndUpdate(userid,{$push:{likedTo:req.params.id}},{new:true})
+            res.json({likedSuccessfully:true,likedToSaved:true,updateLikedTo,updateLikedBy})
         }
 
     }
@@ -253,9 +253,9 @@ router.post('/leftSwipe/:id',fetchuser,async(req,res)=>{
             res.json({leftSwipedPreviously: true})
         }
         else{
-            const updatLeftSwipedBy=await User.findByIdAndUpdate(req.params.id,{$push:{leftSwipedBy:userid}})
-            const updateLeftSwipedTo=await User.findByIdAndUpdate(userid,{$push:{leftSwipedTo:req.params.id}})
-            res.json({leftSwipedSuccessfully:true,leftSwipedSaved:true,updateLeftSwipedTo})
+            const updatLeftSwipedBy=await User.findByIdAndUpdate(req.params.id,{$push:{leftSwipedBy:userid}},{new:true})
+            const updateLeftSwipedTo=await User.findByIdAndUpdate(userid,{$push:{leftSwipedTo:req.params.id}},{new:true})
+            res.json({leftSwipedSuccessfully:true,leftSwipedSaved:true,updateLeftSwipedTo,updatLeftSwipedBy})
         }
 
     }
