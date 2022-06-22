@@ -47,6 +47,14 @@ const UserSchema=new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isDiscoverableSetTime:{
+        type: String,
+        default: ""
+    },
+    isDiscoverableTimeExpires:{
+        type: String,
+        default: ""
+    },
     isAlreadyLoggedIn:{
         type: Boolean,
         default: true

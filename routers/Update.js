@@ -5,6 +5,28 @@ const fetchuser=require('../middleware/fetchuser')
 const multer=require('multer')
 const { v4: uuidv4 } = require('uuid');
 const fs=require('fs')
+var cron = require('node-cron');
+
+// 
+cron.schedule('*/30 * * * *', async() => {
+    console.log("30 minutes")
+    // 
+    let user=await User.find({isDiscoverable:true,$expr: { $gt: [ "$isDiscoverableTimeExpires" , "$isDiscoverableSetTime" ] } })
+
+    // 
+    if(user.length){
+        const newData={}
+        newData.isDiscoverable=false
+        newData.isDiscoverableSetTime=""
+        newData.isDiscoverableTimeExpires=""
+    
+        // 
+        for (let index = 0; index < user.length; index++) {
+            let updateUser=await User.findByIdAndUpdate(user[index]._id,{$set:newData},{new:true})
+            console.log("Updated")
+        }
+    }
+});
 
 // Router
 const router=express.Router()
@@ -129,6 +151,8 @@ router.post('/setDiscoverableT',fetchuser,async(req,res)=>{
         // Setting isDiscoverable to true
         const newData={}
         newData.isDiscoverable=true
+        newData.isDiscoverableSetTime=Date.now()
+        newData.isDiscoverableTimeExpires=Date.now()+(60*60*1000)
 
         const updateDiscoverable=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
 
@@ -184,6 +208,8 @@ router.post('/setDiscoverableF',fetchuser,async(req,res)=>{
         // Setting isDiscoverable to false
         const newData={}
         newData.isDiscoverable=false
+        newData.isDiscoverableSetTime=""
+        newData.isDiscoverableTimeExpires=""
 
         const updateDiscoverable=await User.findByIdAndUpdate(userid,{$set:newData},{new:true})
 

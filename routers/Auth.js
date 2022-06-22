@@ -182,7 +182,19 @@ router.get('/fetchuser',fetchuser,async(req,res)=>{
         const userid=req.user.id
 
         // Get User
-        const user=await User.findById(userid)
+        let user=await User.findById(userid)
+
+        // User Location Check
+        if(user.isDiscoverable && user.isDiscoverableTimeExpires>user.isDiscoverableSetTime){
+            // 
+            const newData={}
+            newData.isDiscoverable=false
+            newData.isDiscoverableSetTime=""
+            newData.isDiscoverableTimeExpires=""
+
+            // 
+            user=await User.findByIdAndUpdate(user._id,{$set:newData},{new:true})
+        }
 
         // Liked To
         let likedTo=[]
