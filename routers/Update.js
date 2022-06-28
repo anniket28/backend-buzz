@@ -142,6 +142,57 @@ router.post('/editUserData',fetchuser,upload.array('images',5),async(req,res)=>{
     }
 })
 
+// Edit and Add Interests
+router.post('/add-interests/:interestName',fetchuser,async(req,res)=>{
+    try{
+        // Getting User Id
+        const userid=req.user.id
+
+        // Get User Details
+        const myUser=await User.findById(userid)
+
+        // Checking Interest
+        if(myUser.interests.includes(req.params.interestName)){
+            res.json({"Interest Already Present":true})
+        }
+        else{
+            const addInterests=await User.findByIdAndUpdate(userid,{$push:{"interests":req.params.interestName}},{new:true})
+    
+            res.json({addedSuccessfully:true,addInterests:addInterests})
+        }
+
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
+// Edit and Remove Interests
+router.post('/remove-interests/:interestName',fetchuser,async(req,res)=>{
+    try{
+        // Getting User Id
+        const userid=req.user.id
+
+        // Get User Details
+        const myUser=await User.findById(userid)
+
+        // Checking Interest
+        if(myUser.interests.includes(req.params.interestName)){
+            const removeInterests=await User.findByIdAndUpdate(userid,{$pull:{"interests":req.params.interestName}},{new:true})
+    
+            res.json({removedSuccessfully:true,removeInterests:removeInterests})
+        }
+        else{
+            res.send({"Interest Exists":false})
+        }
+    }
+    catch (error) {
+        console.log("Internal Server Error "+error)
+        res.send("Internal Server Error")
+    }
+})
+
 // Set Discoverable True
 router.post('/setDiscoverableT',fetchuser,async(req,res)=>{
     try{
